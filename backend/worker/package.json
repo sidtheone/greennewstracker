@@ -1,0 +1,29 @@
+{
+  "name": "@greennewstracker/worker",
+  "version": "1.0.0",
+  "description": "GreenNewsTracker worker service for RSS feed processing",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@greennewstracker/shared": "*",
+    "dotenv": "^16.4.1",
+    "node-cron": "^3.0.3",
+    "rss-parser": "^3.13.0",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/node-cron": "^3.0.11",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  }
+}

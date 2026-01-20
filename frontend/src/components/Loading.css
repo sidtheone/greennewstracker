@@ -1,0 +1,85 @@
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem;
+}
+
+.loading-small {
+  padding: 1rem;
+}
+
+.loading-large {
+  padding: 4rem;
+}
+
+.loading-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-small .loading-spinner {
+  width: 24px;
+  height: 24px;
+}
+
+.loading-medium .loading-spinner {
+  width: 40px;
+  height: 40px;
+}
+
+.loading-large .loading-spinner {
+  width: 64px;
+  height: 64px;
+}
+
+.loading-svg {
+  animation: loading-spin 1s linear infinite;
+}
+
+.loading-circle {
+  stroke: var(--color-primary);
+  stroke-linecap: round;
+  stroke-dasharray: 90, 150;
+  stroke-dashoffset: 0;
+  animation: loading-dash 1.5s ease-in-out infinite;
+}
+
+@keyframes loading-spin {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes loading-dash {
+  0% {
+    stroke-dasharray: 1, 150;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -35;
+  }
+  100% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -124;
+  }
+}
+
+.loading-message {
+  font-size: 0.9375rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+  text-align: center;
+}
+
+.loading-small .loading-message {
+  font-size: 0.8125rem;
+}
+
+.loading-large .loading-message {
+  font-size: 1.125rem;
+}

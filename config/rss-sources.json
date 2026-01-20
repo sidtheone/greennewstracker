@@ -1,0 +1,112 @@
+{
+  "countries": {
+    "US": {
+      "name": "United States",
+      "sources": [
+        {
+          "name": "Environmental News Network",
+          "url": "https://www.enn.com/rss.xml",
+          "category": "environment",
+          "language": "en",
+          "active": true
+        },
+        {
+          "name": "Inside Climate News",
+          "url": "https://insideclimatenews.org/rss.xml",
+          "category": "climate",
+          "language": "en",
+          "active": true
+        },
+        {
+          "name": "Grist",
+          "url": "https://grist.org/feed/",
+          "category": "environment",
+          "language": "en",
+          "active": true
+        }
+      ]
+    },
+    "UK": {
+      "name": "United Kingdom",
+      "sources": [
+        {
+          "name": "The Guardian Environment",
+          "url": "https://www.theguardian.com/environment/rss",
+          "category": "environment",
+          "language": "en",
+          "active": true
+        },
+        {
+          "name": "BBC Science & Environment",
+          "url": "https://feeds.bbci.co.uk/news/science_environment/rss.xml",
+          "category": "science",
+          "language": "en",
+          "active": true
+        }
+      ]
+    },
+    "DE": {
+      "name": "Germany",
+      "sources": [
+        {
+          "name": "Umweltbundesamt",
+          "url": "https://www.umweltbundesamt.de/en/rss",
+          "category": "environment",
+          "language": "de",
+          "active": true
+        },
+        {
+          "name": "Climate Home News",
+          "url": "https://www.climatechangenews.com/feed/",
+          "category": "climate",
+          "language": "en",
+          "active": true
+        }
+      ]
+    },
+    "IN": {
+      "name": "India",
+      "sources": [
+        {
+          "name": "Down To Earth",
+          "url": "https://www.downtoearth.org.in/rss",
+          "category": "environment",
+          "language": "en",
+          "active": true
+        },
+        {
+          "name": "The Hindu Environment",
+          "url": "https://www.thehindu.com/sci-tech/energy-and-environment/feeder/default.rss",
+          "category": "environment",
+          "language": "en",
+          "active": true
+        }
+      ]
+    }
+  },
+  "categories": {
+    "environment": {
+      "name": "Environment",
+      "description": "General environmental news and updates"
+    },
+    "climate": {
+      "name": "Climate Change",
+      "description": "Climate change related news and research"
+    },
+    "science": {
+      "name": "Science",
+      "description": "Scientific discoveries and research"
+    },
+    "energy": {
+      "name": "Energy",
+      "description": "Renewable energy and sustainability"
+    }
+  },
+  "settings": {
+    "fetchIntervalMinutes": 15,
+    "maxArticlesPerFeed": 50,
+    "retryAttempts": 3,
+    "retryDelaySeconds": 5,
+    "timeoutSeconds": 30
+  }
+}

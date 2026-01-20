@@ -1,0 +1,134 @@
+version: '3.8'
+
+services:
+  proxy:
+    build:
+      context: ./docker
+      dockerfile: Dockerfile.proxy
+    container_name: greennewstracker-proxy
+    ports:
+      - "${NGINX_PORT:-80}:80"
+      - "${NGINX_SSL_PORT:-443}:443"
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      api:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
+    networks:
+      - greennewstracker-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: greennewstracker-frontend
+    expose:
+      - "80"
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - VITE_API_URL=${VITE_API_URL:-http://localhost:3001}
+    networks:
+      - greennewstracker-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  api:
+    build:
+      context: ./backend/api
+      dockerfile: Dockerfile
+    container_name: greennewstracker-api
+    expose:
+      - "3000"
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - API_PORT=3000
+      - API_HOST=0.0.0.0
+      - DB_PATH=/app/data/greennews.db
+      - CORS_ORIGIN=${CORS_ORIGIN:-*}
+      - RATE_LIMIT_WINDOW_MS=${RATE_LIMIT_WINDOW_MS:-900000}
+      - RATE_LIMIT_MAX_REQUESTS=${RATE_LIMIT_MAX_REQUESTS:-100}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - LOG_FORMAT=${LOG_FORMAT:-json}
+    volumes:
+      - ${DOCKER_DB_VOLUME_PATH:-./data}:/app/data
+      - ./config:/app/config:ro
+    depends_on:
+      db:
+        condition: service_started
+    networks:
+      - greennewstracker-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  worker:
+    build:
+      context: ./backend/worker
+      dockerfile: Dockerfile
+    container_name: greennewstracker-worker
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - DB_PATH=/app/data/greennews.db
+      - WORKER_CRON_SCHEDULE=${WORKER_CRON_SCHEDULE:-*/15 * * * *}
+      - WORKER_FETCH_TIMEOUT=${WORKER_FETCH_TIMEOUT:-30000}
+      - RSS_SOURCES_PATH=/app/config/rss-sources.json
+      - RSS_MAX_ARTICLES_PER_FEED=${RSS_MAX_ARTICLES_PER_FEED:-50}
+      - RSS_FETCH_INTERVAL_MINUTES=${RSS_FETCH_INTERVAL_MINUTES:-15}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - LOG_FORMAT=${LOG_FORMAT:-json}
+    volumes:
+      - ${DOCKER_DB_VOLUME_PATH:-./data}:/app/data
+      - ./config:/app/config:ro
+    depends_on:
+      db:
+        condition: service_started
+    networks:
+      - greennewstracker-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "process.exit(0)"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  db:
+    image: alpine:latest
+    container_name: greennewstracker-db
+    volumes:
+      - ${DOCKER_DB_VOLUME_PATH:-./data}:/app/data
+    networks:
+      - greennewstracker-network
+    restart: unless-stopped
+    command: tail -f /dev/null
+    healthcheck:
+      test: ["CMD", "test", "-f", "/app/data/greennews.db"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  greennewstracker-network:
+    driver: bridge
+
+volumes:
+  data:
