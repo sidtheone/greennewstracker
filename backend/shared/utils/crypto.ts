@@ -69,11 +69,16 @@ export function encodeCursor(id: number, publishedAt: string): string {
 export function decodeCursor(cursor: string): { id: number; publishedAt: string } {
   try {
     const decoded = Buffer.from(cursor, 'base64').toString('utf-8');
-    const [id, publishedAt] = decoded.split(':');
-    return {
-      id: parseInt(id, 10),
-      publishedAt,
-    };
+    const parts = decoded.split(':');
+    if (parts.length < 2) {
+      throw new Error('Invalid cursor format');
+    }
+    const id = parseInt(parts[0], 10);
+    const publishedAt = parts.slice(1).join(':');
+    if (isNaN(id) || !publishedAt) {
+      throw new Error('Invalid cursor format');
+    }
+    return { id, publishedAt };
   } catch (error) {
     throw new Error('Invalid cursor format');
   }

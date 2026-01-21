@@ -7,11 +7,14 @@ RUN apk add --no-cache dumb-init
 # Set working directory
 WORKDIR /app
 
-# Copy package files
+# Copy root package files for workspace support
 COPY package*.json ./
+COPY backend/worker/package*.json ./backend/worker/
+COPY backend/shared/package*.json ./backend/shared/
+COPY backend/api/package*.json ./backend/api/
 
-# Install dependencies
-RUN npm ci --only=production && \
+# Install dependencies using workspaces
+RUN npm install --omit=dev --workspace=@greennewstracker/worker --workspace=@greennewstracker/shared && \
     npm cache clean --force
 
 # Stage 2: Build stage
@@ -20,19 +23,18 @@ FROM base AS builder
 # Install build dependencies
 RUN apk add --no-cache python3 make g++
 
-# Copy all package files
-COPY package*.json ./
-COPY ../../shared/package.json ../../shared/
-
 # Install all dependencies (including dev)
-RUN npm ci
+RUN npm install
 
 # Copy source code
-COPY . .
-COPY ../../shared ../../shared
+COPY backend/worker ./backend/worker
+COPY backend/shared ./backend/shared
+COPY tsconfig.json ./
+COPY backend/tsconfig.json ./backend/
 
-# Build TypeScript
-RUN npm run build
+# Build shared first, then worker
+RUN npm run build --workspace=@greennewstracker/shared && \
+    npm run build --workspace=@greennewstracker/worker
 
 # Stage 3: Production stage
 FROM node:20-alpine AS production
@@ -51,13 +53,16 @@ WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
+COPY backend/worker/package*.json ./backend/worker/
+COPY backend/shared/package*.json ./backend/shared/
 
 # Install only production dependencies
-RUN npm ci --only=production && \
+RUN npm install --omit=dev --workspace=@greennewstracker/worker --workspace=@greennewstracker/shared && \
     npm cache clean --force
 
 # Copy built application from builder stage
-COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
+COPY --from=builder --chown=nodejs:nodejs /app/backend/worker/dist ./backend/worker/dist
+COPY --from=builder --chown=nodejs:nodejs /app/backend/shared/dist ./backend/shared/dist
 COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
 
 # Switch to non-root user
@@ -71,4 +76,5 @@ HEALTHCHECK --interval=60s --timeout=10s --start-period=60s --retries=3 \
 ENTRYPOINT ["dumb-init", "--"]
 
 # Start the worker
+WORKDIR /app/backend/worker
 CMD ["node", "dist/index.js"]

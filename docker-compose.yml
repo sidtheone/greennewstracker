@@ -48,8 +48,8 @@ services:
 
   api:
     build:
-      context: ./backend/api
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: backend/api/Dockerfile
     container_name: greennewstracker-api
     expose:
       - "3000"
@@ -81,8 +81,8 @@ services:
 
   worker:
     build:
-      context: ./backend/worker
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: backend/worker/Dockerfile
     container_name: greennewstracker-worker
     environment:
       - NODE_ENV=${NODE_ENV:-production}

@@ -9,9 +9,10 @@ WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
+COPY package-lock.json* ./
 
 # Install dependencies
-RUN npm ci && \
+RUN npm install && \
     npm cache clean --force
 
 # Stage 2: Builder
@@ -34,10 +35,6 @@ FROM nginx:alpine AS production
 RUN apk add --no-cache dumb-init tzdata && \
     cp /usr/share/zoneinfo/Etc/UTC /etc/localtime && \
     echo "Etc/UTC" > /etc/timezone
-
-# Create non-root user
-RUN addgroup -g 1001 -S nginx && \
-    adduser -S nginx -u 1001 -G nginx
 
 # Remove default nginx website
 RUN rm -rf /usr/share/nginx/html/*
